@@ -1,0 +1,32 @@
+Build command g++ main.cpp -o test -I./ -L./build -lscam  -lpthread
+
+Run command LD_LIBRARY_PATH=./build ./test
+
+Main functions
+    Automatic device enumeration and format configuration
+    Scan all USB cameras, get supported formats and auto-configure. Defaults to selecting the first format.
+    The program extracts VID:PID when detecting devices. If the 5th digit of the PID is a/b/c, exposure start time is used as the time baseline; if d/e/f, exposure end time is used. 
+Dynamic terminal display
+    Continuously refresh and display detailed info for each frame on the current terminal, including:
+	Logical device index, image format, resolution, data size, real-time FPS
+	Exposure start/end time, exposure duration
+	11 sets of IMU data associated with the device (Acceleration, Gyroscope, Timestamp)
+Keyboard save
+    Press the Space key to save the current frame shown on the screen. It automatically creates a subfolder named with the current system time (YYYYMMDD_HHMMSSZZZ), containing: 
+	YYYYMMDD_HHMMSSZZZ.jpg - JPG image dumped from current frame
+	YYYYMMDD_HHMMSSZZZ.txt - Text file containing frame metadata and detailed 11-set IMU data table
+
+Hardware requirements
+    At least 1 camera supporting the SCAM protocol. The program auto-selects the first detected available device and starts real-time display. 
+
+The program continuously refreshes the terminal (clear and redraw) to show the latest frame information. Example: 
+Camera 0: RGB24 1920x1080, size=6220800 bytes, fps=30.00
+exposure: start=  1234567890 us end=  1234568890 us, duration=    1000 us
+[g] 0x0 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567900 us
+[g] 0x1 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567920 us
+...
+
+Camera X: Logical device index
+Format, resolution, data size, real-time FPS
+exposure: Exposure start time, Exposure end time, Exposure duration (microseconds)
+IMU line: IMU sample index, Acceleration (X/Y/Z), Gyroscope (X/Y/Z), Timestamp

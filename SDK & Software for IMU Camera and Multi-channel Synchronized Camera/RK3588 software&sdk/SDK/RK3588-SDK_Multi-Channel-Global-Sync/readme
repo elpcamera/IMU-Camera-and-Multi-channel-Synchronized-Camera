@@ -1,0 +1,41 @@
+Build command g++ main.cpp -o test -I./ -L./build -lsyncsdk  -lpthread
+
+Run command LD_LIBRARY_PATH=./build ./test
+Main functions
+    Automatic device enumeration and format configuration
+    Scan all USB cameras, set resolution and frame rate, and identify the master device.
+    The fixed format can be changed by modifying `int FormatIndex = 0;`. If the device does not support the default frame rate, the program will exit and prompt. The program will only start normally when the selected frame rate matches the hardware-supported frame rate.
+Real-time sync frame detection
+    When the exposure time difference between the minimum and maximum exposure devices is <= 100us, it is determined to be synchronized and output to the screen.
+    For devices with the 5th digit of the device ID as (a, b, c), exposure start time is used for synchronization.
+    For devices with the 5th digit of the device ID as (d, e, f), exposure end time is used for synchronization.
+Dynamic terminal display
+    Continuously refresh and display detailed information of each synced frame group on the terminal, including: 
+	Device index, imageFormat, resolution, data size, real-time FPS
+	Exposure start/end time, exposure duration
+	IMU data associated with each device (acceleration, gyroscope, timestamp)
+Keyboard save
+    Press the Space key to save the synced frame group shown on the screen. It automatically creates a subfolder named with the current system time (YYYYMMDD_HHMMSSZZZ), containing: 
+	YYYYMMDD_HHMMSSZZZ.jpg - Stitched multi-channel NV12 images (converted to JPG)
+	YYYYMMDD_HHMMSSZZZ.txt - Text file containing frame metadata, IMU table, and global exposure statistics for each channel
+
+Hardware requirements
+    At least 2 synchronized cameras(Support hardware trigger sync), One device must have a hardware PID (extracted from VID:PID) with the last two decimal digits as 01, which will act as the master device.
+
+The program continuously refreshes the terminal (clears and redraws) to display information about the latest synced frame group. Example:
+Camera 0: MJPG 1920x1080, size=123456 bytes, fps=30.00
+exposure: start=  1234567890 us end=  1234568890 us, duration=    1000 us
+[g] 0x0 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567900 us
+[g] 0x1 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567920 us
+...
+
+Camera 1: MJPG 1920x1080, size=123456 bytes, fps=30.00
+exposure: start=  1234567895 us end=  1234568895 us, duration=    1000 us
+[g] 0x0 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567905 us
+[g] 0x1 Acc=(  0.123456, -0.234567,  9.810000) Gyro=(  0.001234,  0.002345, -0.003456) time=  1234567925 us
+...
+Camera X: Logical device index
+Format, resolution, data size, real-time FPS
+exposure: Exposure start time, Exposure end time, Exposure duration (microseconds)
+IMU line: IMU sample index, Acceleration (X/Y/Z), Gyroscope (X/Y/Z), Timestamp
+ 
